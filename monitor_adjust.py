@@ -7,6 +7,7 @@ import sys
 import pymysql
 import json
 import urllib.parse
+import configparser
 
 class ProcessTransientFile(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self,event):
@@ -33,7 +34,7 @@ def intodb(line):
         sql_value += "%s,"
         value.append(d.get(v))
     sql = sql.strip(',') + sql_value.strip(',') + ')'
-#    print(sql)
+    print(sql)
     try:
         with conn.cursor() as cur:
             cur.execute("SET NAMES utf8")
@@ -56,26 +57,29 @@ def parseLog(line):
 
 def LogMonitor(path):
     print('job start!')
+    dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     wm = pyinotify.WatchManager()
     notifier = pyinotify.Notifier(wm)
     wm.watch_transient_file(path, pyinotify.IN_MODIFY, ProcessTransientFile)
-    notifier.loop(daemonize=True, pid_file='/home/vagrant/script/ntom/adjust.pid', stdout='/home/vagrant/script/ntom/log/run.log', stderr='/home/vagrant/script/ntom/log/run_err.log')
+    notifier.loop(daemonize=True, pid_file=dir+'/adjust.pid', stdout=dir+'/log/run.log', stderr=dir+'/log/run_err.log')
 
 if __name__ == '__main__':
+    cf = configparser.ConfigParser()
+    cf.read(os.path.dirname(__file__) + '/../default.ini')
     db = {
-        'host':'127.0.0.1',
-        'port':3306,
-        'user':'root',
-        'password':'',
-        'db':'test',
-        'charset':'utf8'
+        'host':cf.get('db', 'host'),
+        'port':cf.getint('db', 'port'),
+        'user':cf.get('db', 'user'),
+        'password':cf.get('db', 'password'),
+        'db':cf.get('db', 'db'),
+        'charset':cf.get('db', 'charset')
     }
+    ngLog = cf.get('log', 'adjust')
     try:
         conn = pymysql.connect(**db)
     except pymysql.OperationalError as e:
         print('mysql connect error: ' + str(e.args))
 
-    ngLog = '/data/webservice/logs/nginx/growth/adjust.log'
     file = open(ngLog, 'r')
     st_results = os.stat(ngLog)
     st_size = st_results[6]
