@@ -1,0 +1,3 @@
+pip install pyinotify
+pip install pymysql
+pip install circus
