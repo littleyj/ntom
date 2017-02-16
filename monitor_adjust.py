@@ -34,7 +34,7 @@ def intodb(line):
         sql_value += "%s,"
         value.append(d.get(v))
     sql = sql.strip(',') + sql_value.strip(',') + ')'
-    print(sql)
+#    print(sql)
     try:
         with conn.cursor() as cur:
             cur.execute("SET NAMES utf8")
