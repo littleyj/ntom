@@ -59,12 +59,12 @@ class ProcessTransientFile(pyinotify.ProcessEvent):
         return d
 
 def LogMonitor(path):
-    print('job start!')
+    print('appsflyer job start!')
     dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     wm = pyinotify.WatchManager()
     notifier = pyinotify.Notifier(wm)
     wm.watch_transient_file(path, pyinotify.IN_MODIFY, ProcessTransientFile)
-    notifier.loop(daemonize=True, pid_file=dir+'/adjust.pid', stdout=dir+'/log/run.log', stderr=dir+'/log/run_err.log')
+    notifier.loop(daemonize=True, pid_file=dir+'/appsflyer.pid', stdout=dir+'/log/run.log', stderr=dir+'/log/run_err.log')
 
 if __name__ == '__main__':
     cf = configparser.ConfigParser()

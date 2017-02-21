@@ -60,7 +60,7 @@ class ProcessTransientFile(pyinotify.ProcessEvent):
         return d
 
 def LogMonitor(path):
-    print('job start!')
+    print('adjust job start!')
     dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     wm = pyinotify.WatchManager()
     notifier = pyinotify.Notifier(wm)
