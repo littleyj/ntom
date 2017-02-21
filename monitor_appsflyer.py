@@ -35,7 +35,7 @@ class ProcessTransientFile(pyinotify.ProcessEvent):
         for v in key:
             value.append(d.get(v))
         self._data.append(value)
-        if self._insert_time != time.time() and self._insert_time + 5 * 60 <= int(time.time()) or len(self._data) >= 1:
+        if self._insert_time != time.time() and self._insert_time + 5 * 60 <= int(time.time()) or len(self._data) >= 1000:
             try:
                 with conn.cursor() as cur:
                     cur.execute("SET NAMES utf8")
@@ -64,7 +64,7 @@ def LogMonitor(path):
     wm = pyinotify.WatchManager()
     notifier = pyinotify.Notifier(wm)
     wm.watch_transient_file(path, pyinotify.IN_MODIFY, ProcessTransientFile)
-    notifier.loop(daemonize=False, pid_file=dir+'/adjust.pid', stdout=dir+'/log/run.log', stderr=dir+'/log/run_err.log')
+    notifier.loop(daemonize=True, pid_file=dir+'/adjust.pid', stdout=dir+'/log/run.log', stderr=dir+'/log/run_err.log')
 
 if __name__ == '__main__':
     cf = configparser.ConfigParser()
