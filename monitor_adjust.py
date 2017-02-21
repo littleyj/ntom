@@ -61,7 +61,7 @@ class ProcessTransientFile(pyinotify.ProcessEvent):
 
 def LogMonitor(path):
     print('job start!')
-    dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     wm = pyinotify.WatchManager()
     notifier = pyinotify.Notifier(wm)
     wm.watch_transient_file(path, pyinotify.IN_MODIFY, ProcessTransientFile)
@@ -69,7 +69,7 @@ def LogMonitor(path):
 
 if __name__ == '__main__':
     cf = configparser.ConfigParser()
-    cf.read(os.path.abspath(os.path.dirname(__file__) + '/../default.ini'))
+    cf.read(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../default.ini'))
     db = {
         'host':cf.get('db', 'host'),
         'port':cf.getint('db', 'port'),
