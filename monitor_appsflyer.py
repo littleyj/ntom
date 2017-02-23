@@ -82,7 +82,7 @@ def LogMonitor(path):
     wm = pyinotify.WatchManager()
     notifier = pyinotify.Notifier(wm)
     wm.watch_transient_file(path, pyinotify.IN_MODIFY, ProcessTransientFile)
-    notifier.loop(daemonize=False, pid_file=dir+'/appsflyer.pid', stdout=dir+'/log/run.log', stderr=dir+'/log/run_err.log')
+    notifier.loop(daemonize=True, pid_file=dir+'/appsflyer.pid', stdout=dir+'/log/run.log', stderr=dir+'/log/run_err.log')
 
 if __name__ == '__main__':
     cf = configparser.ConfigParser()
