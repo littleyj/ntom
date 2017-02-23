@@ -13,6 +13,22 @@ class ProcessTransientFile(pyinotify.ProcessEvent):
     def my_init(self):
         self._data = []
         self._insert_time = time.time()
+        self._conn = None
+        self._init_db()
+
+    def _init_db(self):
+        try:
+            self._conn = pymysql.connect(**db)
+        except pymysql.OperationalError as e:
+            print('mysql connect error: ' + str(e.args))
+
+    def _ping(self):
+        try:
+            cursor = self._conn.cursor()
+            cursor.execute('select 1;')
+            return True
+        except pymysql.OperationalError as e:
+            return False
 
     def process_IN_MODIFY(self, event):
         line = file.readline()
@@ -32,20 +48,23 @@ class ProcessTransientFile(pyinotify.ProcessEvent):
             'deeplink','label']
         sql = "INSERT INTO " + table + "(" + ','.join(key) + ') VALUES(' + ('%s,'*len(key)).strip(',') + ')'
 #        print(sql)
+        print(d)
         value = []
         for v in key:
             value.append(d.get(v))
         self._data.append(value)
         if self._insert_time != time.time() and self._insert_time + 5*60 <= int(time.time()) or len(self._data) >= 1:
             try:
-                with conn.cursor() as cur:
+                if not self._ping():
+                    self._init_db()
+                with self._conn.cursor() as cur:
                     cur.execute("SET NAMES utf8")
                     cur.executemany(sql, self._data)
-                conn.commit()
+                self._conn.commit()
             except pymysql.OperationalError as e:
                 print('pymysql error: ' + str(e.args))
 #            finally:
-#                conn.close()
+#                self._conn.close()
             del self._data[:]
             self._insert_time = time.time()
 
@@ -79,12 +98,6 @@ if __name__ == '__main__':
         'charset':cf.get('db', 'charset')
     }
     ngLog = cf.get('log', 'adjust')
-    data = []
-    insert_time = time.time()
-    try:
-        conn = pymysql.connect(**db)
-    except pymysql.OperationalError as e:
-        print('mysql connect error: ' + str(e.args))
 
     file = open(ngLog, 'r')
     st_results = os.stat(ngLog)
